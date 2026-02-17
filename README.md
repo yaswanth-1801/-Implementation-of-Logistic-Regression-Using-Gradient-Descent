@@ -8,86 +8,92 @@ To write a program to implement the the Logistic Regression Using Gradient Desce
 2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
 ## Algorithm
-1.Import Necessary Libraries: Import NumPy, pandas, and StandardScaler for numerical operations, data handling, and feature scaling, respectively.
+1. Load the dataset, convert the target values into binary form (0 and 1), normalize the features, and add a bias column
+2. Initialize the model weights to zero and set the learning rate and number of iterations.
+3. Compute the predicted probabilities using the sigmoid function
+4. Calculate the error and update the weights using gradient descent. Repeat this process for all iterations.
+5. Use the trained model to predict class labels and calculate the accuracy of the model.
 
-2.Define the Linear Regression Function: Create a linear regression function using gradient descent to iteratively update parameters, minimizing the difference between predicted and actual values.
-
-3.Load and Preprocess the Data: Load the dataset, extract features and target variable, and standardize both using StandardScaler for consistent model training.
-
-4.Perform Linear Regression: Apply the defined linear regression function to the scaled features and target variable, obtaining optimal parameters for the model.
-
-5.Make Predictions on New Data: Prepare new data, scale it, and use the trained model to predict the target variable, transforming predictions back to the original scale.
-
-6.Print the Predicted Value
 
 ## Program:
 ```
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+# Load data
+data = pd.read_csv("Placement_Data.csv")
+
+# Convert Placed / Not Placed to 1 / 0
+data['status'] = data['status'].map({'Placed': 1, 'Not Placed': 0})
+
+# Take only 2 features (simple)
+X = data[['ssc_p', 'mba_p']].values
+y = data['status'].values
+
+# -----------------------------
+# Standard Scaler (Normalization)
+# -----------------------------
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Add bias column (1)
+m = len(y)
+X = np.c_[np.ones(m), X]
+
+# Sigmoid function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Cost function
+def cost_function(X, y, theta):
+    h = sigmoid(X @ theta)
+    return (-1/m) * np.sum(y*np.log(h) + (1-y)*np.log(1-h))
+
+# Gradient Descent
+theta = np.zeros(X.shape[1])
+alpha = 0.1
+cost_history = []
+
+for i in range(500):
+    z = X @ theta
+    h = sigmoid(z)
+    gradient = (1/m) * X.T @ (h - y)
+    theta = theta - alpha * gradient
+    
+    cost = cost_function(X, y, theta)
+    cost_history.append(cost)
+
+# Prediction
+y_pred = (sigmoid(X @ theta) >= 0.5).astype(int)
+
+# Accuracy
+accuracy = np.mean(y_pred == y) * 100
+print("Weights:", theta)
+print("Accuracy:", accuracy, "%")
+
+# -----------------------------
+# PLOT: Cost vs Iterations
+# -----------------------------
+plt.figure()
+plt.plot(cost_history)
+plt.xlabel("Iterations")
+plt.ylabel("Cost")
+plt.title("Logistic Regression using Gradient Descent")
+plt.show()
 /*
 Program to implement the the Logistic Regression Using Gradient Descent.
 Developed by: Yaswanth R
 RegisterNumber:  25007390
 */
-import pandas as pd
-import numpy as np
-data = pd.read_csv("Placement_Data.csv")
-data1 = data.drop(['sl_no', 'salary'], axis=1)
 
-from sklearn.preprocessing import LabelEncoder
-le = LabelEncoder()
-data1["gender"] = le.fit_transform(data1["gender"])
-data1["ssc_b"] = le.fit_transform(data1["ssc_b"])
-data1["hsc_b"] = le.fit_transform(data1["hsc_b"])
-data1["hsc_s"] = le.fit_transform(data1["hsc_s"])
-data1["degree_t"] = le.fit_transform(data1["degree_t"])
-data1["workex"] = le.fit_transform(data1["workex"])
-data1["specialisation"] = le.fit_transform(data1["specialisation"])
-data1["status"] = le.fit_transform(data1["status"])
-X = data1.iloc[:, :-1].values  
-Y = data1["status"].values
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-theta = np.random.randn(X.shape[1])
-alpha = 0.01  
-num_iterations = 1000 
-
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
-def loss(theta, X, y):
-    h = sigmoid(X.dot(theta))
-    return -np.sum(y * np.log(h + 1e-15) + (1 - y) * np.log(1 - h + 1e-15)) / len(y)
-
-def gradient_descent(theta, X, y, alpha, num_iterations):
-    m = len(y)
-    for i in range(num_iterations):
-        h = sigmoid(X.dot(theta))
-        gradient = X.T.dot(h - y) / m
-        theta -= alpha * gradient
-    return theta
-
-theta = gradient_descent(theta, X, Y, alpha, num_iterations)
-
-def predict(theta, X):
-    h = sigmoid(X.dot(theta))
-    return np.where(h >= 0.5, 1, 0)
-
-y_pred = predict(theta, X)
-accuracy = np.mean(y_pred == Y)
-
-print("Accuracy:", accuracy)
-print("\nPredicted:\n", y_pred)
-print("\nActual:\n", Y)
-
-xnew = np.array([[0, 87, 0, 95, 0, 2, 78, 2, 0, 0, 1, 0]])
-xnew = scaler.transform(xnew)
-y_prednew = predict(theta, xnew)
-print("\nPredicted Result:", y_prednew)
 
 ```
 
 ## Output:
-<img width="1117" height="605" alt="image" src="https://github.com/user-attachments/assets/48b09b93-1bec-4c1d-b435-92f4807536b7" />
+<img width="740" height="626" alt="image" src="https://github.com/user-attachments/assets/1446bcdb-7717-4b17-862a-ffdf99628d99" />
+
 
 
 
